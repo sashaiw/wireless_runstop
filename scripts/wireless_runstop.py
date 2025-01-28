@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python2
 
 import rospy
 from std_msgs.msg import Bool
@@ -15,24 +15,24 @@ def connect_to_estop():
 
         try:
             # attempt connection to estop
-            rospy.loginfo(f"Trying to connect to e-stop at {host}:{port}...")
+            rospy.loginfo("Trying to connect to e-stop at {0}:{1}...".format(host, port))
             s = socket.socket()
             s.settimeout(timeout)
             s.connect((host, port))
 
             # return socket
-            rospy.loginfo(f"Connected to e-stop!")
+            rospy.loginfo("Connected to e-stop!")
             return s
 
         except (socket.timeout, socket.error) as e:
-            rospy.logwarn(f"Connection failed: {e}. Retrying after {timeout} seconds...")
+            rospy.logwarn("Connection failed: {0}. Retrying after {1} seconds...".format(e, timeout))
             rospy.sleep(timeout)
 
 if __name__ == '__main__':
     pub = rospy.Publisher('enable_software_runstop', Bool, queue_size=1)
     rospy.init_node('wireless_estop')
 
-    rospy.loginfo(f"Engaging runstop until connected to wireless e-stop")
+    rospy.loginfo("Engaging runstop until connected to wireless e-stop")
     pub.publish(True)
 
     s = connect_to_estop()
@@ -48,13 +48,13 @@ if __name__ == '__main__':
             estop_pressed = s.recv(1024) == b'\x00'
 
             if estop_pressed:
-                rospy.logwarn(f"e-stop engaged")
+                rospy.logwarn("e-stop engaged")
                 pub.publish(True)
             else:
                 pub.publish(False)
 
         except (socket.timeout, socket.error) as e:
-            rospy.logwarn(f"Connection lost: {e}. Engaging failsafe and reconnecting...")
+            rospy.logwarn("Connection lost: {0}. Engaging failsafe and reconnecting...".format(e))
             pub.publish(True)
             s.close()
             s = None
